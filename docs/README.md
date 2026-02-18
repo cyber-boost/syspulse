@@ -1,6 +1,8 @@
 # Syspulse
 
-Syspulse provides a lightweight, cross-platform daemon manager for developers and DevOps engineers who need reliable process control in production services.
+Syspulse is a lightweight, cross‑platform daemon manager that gives developers and DevOps engineers a unified, reliable way to control long‑running processes and services across Windows, macOS, and Linux environments.
+
+It abstracts away platform‑specific quirks, offering a consistent CLI and API for process lifecycle management, health monitoring, and log handling. Define daemons in a single TOML file and manage them with uniform commands, cutting operational overhead across Windows, macOS, and Linux.
 
 ## Value Proposition
 
