@@ -1,0 +1,5 @@
+- Chose concise, developer‑focused tone.
+- Highlighted cross‑platform nature early.
+- Listed key features as bullet points for quick scan.
+- Included one‑line install command using Cargo.
+- Avoided tutorial depth, kept overview brief.

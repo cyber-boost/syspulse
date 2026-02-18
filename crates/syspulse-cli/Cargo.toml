@@ -1,0 +1,25 @@
+[package]
+name = "syspulse-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CLI for syspulse daemon manager"
+
+[[bin]]
+name = "syspulse"
+path = "src/main.rs"
+
+[dependencies]
+syspulse-core = { path = "../syspulse-core" }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+clap = { workspace = true }
+comfy-table = { workspace = true }
+owo-colors = { workspace = true }
+chrono = { workspace = true }

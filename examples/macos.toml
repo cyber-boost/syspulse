@@ -1,0 +1,83 @@
+# macOS-specific daemon examples
+# Uses Unix paths, Homebrew-installed services, and macOS tooling.
+
+[[daemon]]
+name = "postgres-dev"
+command = ["/opt/homebrew/bin/postgres", "-D", "/opt/homebrew/var/postgresql@16"]
+description = "PostgreSQL 16 development server via Homebrew"
+tags = ["macos", "database", "postgres"]
+
+[daemon.health_check]
+type = "tcp"
+target = "127.0.0.1:5432"
+interval_secs = 10
+timeout_secs = 3
+retries = 5
+start_period_secs = 5
+
+[daemon.restart_policy]
+policy = "always"
+backoff_base_secs = 2
+backoff_max_secs = 60
+
+[daemon.resource_limits]
+max_memory_bytes = 2147483648   # 2 GB
+max_open_files = 256
+
+[daemon.log_config]
+max_size_bytes = 104857600      # 100 MB
+retain_count = 7
+
+[[daemon]]
+name = "swift-api"
+command = [".build/release/MyServer", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
+working_dir = "/Users/dev/MyServer"
+description = "Vapor Swift web server"
+stop_timeout_secs = 15
+tags = ["macos", "swift", "api"]
+
+[daemon.env]
+LOG_LEVEL = "notice"
+DATABASE_URL = "postgres://localhost:5432/myapp"
+
+[daemon.health_check]
+type = "http"
+target = "http://127.0.0.1:8080/health"
+interval_secs = 30
+timeout_secs = 5
+retries = 3
+
+[daemon.restart_policy]
+policy = "on_failure"
+max_retries = 10
+backoff_base_secs = 1
+backoff_max_secs = 300
+
+[[daemon]]
+name = "redis-cache"
+command = ["/opt/homebrew/bin/redis-server", "--port", "6379", "--maxmemory", "256mb"]
+description = "Redis cache server via Homebrew"
+tags = ["macos", "redis", "cache"]
+
+[daemon.health_check]
+type = "command"
+target = "/opt/homebrew/bin/redis-cli ping"
+interval_secs = 15
+timeout_secs = 3
+retries = 3
+
+[daemon.restart_policy]
+policy = "always"
+backoff_base_secs = 1
+backoff_max_secs = 30
+
+[[daemon]]
+name = "tailscale-monitor"
+command = ["/bin/bash", "-c", "while true; do /usr/local/bin/tailscale status --json > /tmp/tailscale-status.json; sleep 60; done"]
+description = "Periodic Tailscale status snapshot"
+schedule = "*/5 * * * *"
+tags = ["macos", "network", "monitoring"]
+
+[daemon.restart_policy]
+policy = "on_failure"
+max_retries = 3

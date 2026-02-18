@@ -1,0 +1,73 @@
+[workspace]
+members = [
+    "crates/syspulse-core",
+    "crates/syspulse-cli",
+    "crates/syspulse-python",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/syspulse/syspulse"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# Logging / tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Scheduling
+tokio-cron-scheduler = "0.13"
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# IPC
+interprocess = { version = "2", features = ["tokio"] }
+
+# HTTP (health checks)
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+
+# Async traits
+async-trait = "0.1"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# IDs
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# System info
+sysinfo = "0.32"
+
+# CLI
+clap = { version = "4", features = ["derive", "env"] }
+comfy-table = "7"
+owo-colors = "4"
+
+# Python bindings
+pyo3 = { version = "0.24", features = ["extension-module"] }
+
+# Human-readable durations
+humantime = "2"
+
+# Platform-specific (Unix)
+[workspace.dependencies.nix]
+version = "0.29"
+features = ["signal", "process"]
+
+[workspace.dependencies.rlimit]
+version = "0.10"

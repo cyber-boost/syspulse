@@ -1,0 +1,20 @@
+pub mod error;
+pub mod daemon;
+pub mod lifecycle;
+pub mod paths;
+pub mod resources;
+pub mod restart;
+pub mod config;
+pub mod process;
+pub mod health;
+pub mod registry;
+pub mod logs;
+pub mod ipc;
+pub mod manager;
+pub mod scheduler;
+
+pub use error::{SyspulseError, Result};
+pub use daemon::{DaemonSpec, DaemonInstance, HealthStatus, HealthCheckSpec};
+pub use lifecycle::LifecycleState;
+pub use restart::RestartPolicy;
+pub use config::parse_config;

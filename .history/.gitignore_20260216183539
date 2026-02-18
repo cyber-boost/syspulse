@@ -1,0 +1,15 @@
+/target
+**/target
+Cargo.lock
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+.venv/
+*.so
+*.dll
+*.dylib
+*.pdb
+.env
+*.db
+*.db-journal
