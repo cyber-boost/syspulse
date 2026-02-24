@@ -7,11 +7,7 @@ use crate::client::CliClient;
 use crate::commands::OutputFormat;
 use crate::output;
 
-pub async fn run(
-    socket_path: &Path,
-    name: Option<&str>,
-    format: &OutputFormat,
-) -> Result<()> {
+pub async fn run(socket_path: &Path, name: Option<&str>, format: &OutputFormat) -> Result<()> {
     let client = CliClient::new(socket_path);
 
     let response = client

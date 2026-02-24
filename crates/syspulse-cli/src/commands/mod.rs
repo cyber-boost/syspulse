@@ -108,7 +108,7 @@ pub enum Commands {
     },
     /// Add a new daemon
     Add {
-        /// Load from TOML config file
+        /// Load from config file (.sys)
         #[arg(long)]
         file: Option<std::path::PathBuf>,
         /// Daemon name (when not using --file)
@@ -129,7 +129,7 @@ pub enum Commands {
     /// Generate a template config file
     Init {
         /// Output path
-        #[arg(default_value = "syspulse.toml")]
+        #[arg(default_value = "syspulse.sys")]
         path: std::path::PathBuf,
     },
 }

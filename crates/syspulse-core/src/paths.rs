@@ -10,9 +10,7 @@ pub fn data_dir() -> PathBuf {
     }
     #[cfg(windows)]
     {
-        dirs::data_local_dir()
-            .unwrap_or_default()
-            .join("syspulse")
+        dirs::data_local_dir().unwrap_or_default().join("syspulse")
     }
 }
 

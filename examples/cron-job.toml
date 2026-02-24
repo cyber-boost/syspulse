@@ -1,8 +1,0 @@
-[daemon]
-name = "cleanup-job"
-command = ["python", "scripts/cleanup.py"]
-schedule = "0 0 * * *"
-description = "Daily cleanup job"
-
-[daemon.restart_policy]
-policy = "never"

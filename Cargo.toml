@@ -2,7 +2,7 @@
 members = [
     "crates/syspulse-core",
     "crates/syspulse-cli",
-    "crates/syspulse-python",
+    "crates/syspulse-py",
 ]
 resolver = "2"
 
@@ -10,7 +10,7 @@ resolver = "2"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/syspulse/syspulse"
+repository = "https://github.com/cyber-boost/syspulse"
 
 [workspace.dependencies]
 # Async runtime

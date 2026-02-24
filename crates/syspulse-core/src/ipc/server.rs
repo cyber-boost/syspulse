@@ -12,9 +12,7 @@ use interprocess::local_socket::GenericFilePath as NameType;
 #[cfg(windows)]
 use interprocess::local_socket::GenericNamespaced as NameType;
 
-use interprocess::local_socket::{
-    traits::tokio::Listener, tokio::prelude::*, ListenerOptions,
-};
+use interprocess::local_socket::{tokio::prelude::*, traits::tokio::Listener, ListenerOptions};
 
 pub struct IpcServer {
     socket_path: PathBuf,

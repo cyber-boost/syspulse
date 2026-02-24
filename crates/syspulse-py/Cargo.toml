@@ -1,0 +1,18 @@
+[package]
+name = "syspulse-py"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Python bindings for syspulse daemon manager"
+
+[lib]
+name = "_syspulse"
+crate-type = ["cdylib"]
+
+[dependencies]
+syspulse-core = { path = "../syspulse-core" }
+pyo3 = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }

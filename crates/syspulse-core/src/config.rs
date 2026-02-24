@@ -107,7 +107,10 @@ compress_rotated = true
         assert_eq!(spec.tags, vec!["web", "production"]);
         assert_eq!(spec.description.as_deref(), Some("A full daemon example"));
         assert_eq!(spec.user.as_deref(), Some("www-data"));
-        assert_eq!(spec.env.get("NODE_ENV").map(String::as_str), Some("production"));
+        assert_eq!(
+            spec.env.get("NODE_ENV").map(String::as_str),
+            Some("production")
+        );
 
         let hc = spec.health_check.as_ref().unwrap();
         assert_eq!(hc.target, "http://localhost:3000/health");

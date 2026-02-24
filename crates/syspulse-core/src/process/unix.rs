@@ -87,10 +87,7 @@ impl ProcessDriver for UnixProcessDriver {
         // Detach: drop the child handle so we don't wait on it
         std::mem::forget(child);
 
-        Ok(ProcessInfo {
-            pid,
-            alive: true,
-        })
+        Ok(ProcessInfo { pid, alive: true })
     }
 
     async fn stop(&self, pid: u32, timeout_secs: u64) -> Result<()> {
@@ -160,18 +157,13 @@ impl ProcessDriver for UnixProcessDriver {
     async fn resource_usage(&self, pid: u32) -> Result<ResourceUsage> {
         let sys_pid = sysinfo::Pid::from_u32(pid);
         let mut sys = System::new_with_specifics(
-            RefreshKind::nothing().with_processes(
-                ProcessRefreshKind::nothing()
-                    .with_memory()
-                    .with_cpu(),
-            ),
+            RefreshKind::nothing()
+                .with_processes(ProcessRefreshKind::nothing().with_memory().with_cpu()),
         );
         sys.refresh_processes_specifics(
             sysinfo::ProcessesToUpdate::Some(&[sys_pid]),
             true,
-            ProcessRefreshKind::nothing()
-                .with_memory()
-                .with_cpu(),
+            ProcessRefreshKind::nothing().with_memory().with_cpu(),
         );
 
         match sys.process(sys_pid) {
@@ -179,10 +171,7 @@ impl ProcessDriver for UnixProcessDriver {
                 memory_bytes: proc.memory(),
                 cpu_percent: proc.cpu_usage() as f64,
             }),
-            None => Err(SyspulseError::Process(format!(
-                "Process {} not found",
-                pid
-            ))),
+            None => Err(SyspulseError::Process(format!("Process {} not found", pid))),
         }
     }
 }

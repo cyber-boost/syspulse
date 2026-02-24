@@ -67,7 +67,10 @@ pub fn run(path: &Path) -> Result<()> {
 
     std::fs::write(path, TEMPLATE)?;
     println!("Created template config at: {}", path.display());
-    println!("Edit this file and then run: syspulse add --file {}", path.display());
+    println!(
+        "Edit this file and then run: syspulse add --file {}",
+        path.display()
+    );
 
     Ok(())
 }

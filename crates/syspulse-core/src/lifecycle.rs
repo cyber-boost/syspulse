@@ -32,10 +32,7 @@ impl LifecycleState {
         )
     }
 
-    pub fn transition_to(
-        &self,
-        target: LifecycleState,
-    ) -> crate::error::Result<LifecycleState> {
+    pub fn transition_to(&self, target: LifecycleState) -> crate::error::Result<LifecycleState> {
         if self.can_transition_to(target) {
             Ok(target)
         } else {

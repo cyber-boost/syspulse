@@ -2,7 +2,7 @@
 
 Syspulse is a lightweight, cross‑platform daemon manager that gives developers and DevOps engineers a unified, reliable way to control long‑running processes and services across Windows, macOS, and Linux environments.
 
-It abstracts away platform‑specific quirks, offering a consistent CLI and API for process lifecycle management, health monitoring, and log handling. Define daemons in a single TOML file and manage them with uniform commands, cutting operational overhead across Windows, macOS, and Linux.
+It abstracts away platform‑specific quirks, offering a consistent CLI and API for process lifecycle management, health monitoring, and log handling. Define daemons in a single `.sys` file and manage them with uniform commands, cutting operational overhead across Windows, macOS, and Linux.
 
 ## Value Proposition
 
@@ -25,7 +25,7 @@ cargo install syspulse-cli
 
 Create a daemon configuration:
 ```toml
-# mydaemons.toml
+# mydaemons.sys
 [[daemon]]
 name = "web-server"
 command = ["python", "-m", "http.server", "8000"]
@@ -38,7 +38,7 @@ Start managing your daemons:
 syspulse daemon &
 
 # Add your daemon
-syspulse add --file mydaemons.toml
+syspulse add --file mydaemons.sys
 
 # Start the web server
 syspulse start web-server
@@ -62,7 +62,7 @@ syspulse status
 
 See our full documentation in the [`docs/`](docs/) directory:
 - [Quick Start Guide](docs/QUICKSTART.md) - Step-by-step tutorial
-- [Configuration Reference](docs/CONFIG.md) - Complete TOML configuration options
+- [Configuration Reference](docs/CONFIG.md) - Complete `.sys` configuration options
 - [Why Syspulse?](docs/WHY.md) - Comparison with alternatives and decision guide
 
 ## Examples
@@ -82,7 +82,7 @@ syspulse/
 ├── crates/
 │   ├── syspulse-core/    # Core daemon management logic
 │   ├── syspulse-cli/     # Command-line interface
-│   └── syspulse-python/  # Python bindings
+│   └── syspulse-py/  # Python bindings
 ├── examples/             # Sample configurations
 └── docs/                 # Documentation
 ```

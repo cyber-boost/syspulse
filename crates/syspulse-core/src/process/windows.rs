@@ -6,8 +6,7 @@ use windows::Win32::Foundation::{CloseHandle, HANDLE, STILL_ACTIVE, WAIT_OBJECT_
 use windows::Win32::System::Console::{GenerateConsoleCtrlEvent, CTRL_BREAK_EVENT};
 use windows::Win32::System::JobObjects::{
     AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
-    SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
-    JOB_OBJECT_LIMIT_PROCESS_MEMORY,
+    SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION, JOB_OBJECT_LIMIT_PROCESS_MEMORY,
 };
 use windows::Win32::System::Threading::{
     GetExitCodeProcess, OpenProcess, TerminateProcess, WaitForSingleObject,
@@ -32,9 +31,7 @@ impl WindowsProcessDriver {
                 false,
                 pid,
             )
-            .map_err(|e| {
-                SyspulseError::Process(format!("Failed to open process {}: {}", pid, e))
-            })
+            .map_err(|e| SyspulseError::Process(format!("Failed to open process {}: {}", pid, e)))
         }
     }
 }
@@ -96,10 +93,7 @@ impl ProcessDriver for WindowsProcessDriver {
         // Detach
         std::mem::forget(child);
 
-        Ok(ProcessInfo {
-            pid,
-            alive: true,
-        })
+        Ok(ProcessInfo { pid, alive: true })
     }
 
     async fn stop(&self, pid: u32, timeout_secs: u64) -> Result<()> {
@@ -146,8 +140,7 @@ impl ProcessDriver for WindowsProcessDriver {
         };
         let mut exit_code: u32 = 0;
         let alive = unsafe {
-            GetExitCodeProcess(handle, &mut exit_code).is_ok()
-                && exit_code == STILL_ACTIVE.0 as u32
+            GetExitCodeProcess(handle, &mut exit_code).is_ok() && exit_code == STILL_ACTIVE.0 as u32
         };
         unsafe {
             let _ = CloseHandle(handle);
@@ -180,18 +173,12 @@ impl ProcessDriver for WindowsProcessDriver {
     async fn resource_usage(&self, pid: u32) -> Result<ResourceUsage> {
         let sys_pid = sysinfo::Pid::from_u32(pid);
         let mut sys = System::new_with_specifics(
-            RefreshKind::new().with_processes(
-                ProcessRefreshKind::new()
-                    .with_memory()
-                    .with_cpu(),
-            ),
+            RefreshKind::new().with_processes(ProcessRefreshKind::new().with_memory().with_cpu()),
         );
         sys.refresh_processes_specifics(
             sysinfo::ProcessesToUpdate::Some(&[sys_pid]),
             true,
-            ProcessRefreshKind::new()
-                .with_memory()
-                .with_cpu(),
+            ProcessRefreshKind::new().with_memory().with_cpu(),
         );
 
         match sys.process(sys_pid) {
@@ -199,10 +186,7 @@ impl ProcessDriver for WindowsProcessDriver {
                 memory_bytes: proc.memory(),
                 cpu_percent: proc.cpu_usage() as f64,
             }),
-            None => Err(SyspulseError::Process(format!(
-                "Process {} not found",
-                pid
-            ))),
+            None => Err(SyspulseError::Process(format!("Process {} not found", pid))),
         }
     }
 }
@@ -230,13 +214,11 @@ fn apply_job_limits(pid: u32, limits: &crate::resources::ResourceLimits) -> Resu
             SyspulseError::Process(format!("SetInformationJobObject failed: {}", e))
         })?;
 
-        let handle =
-            OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, false, pid).map_err(
-                |e| {
-                    let _ = CloseHandle(job);
-                    SyspulseError::Process(format!("OpenProcess failed: {}", e))
-                },
-            )?;
+        let handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, false, pid)
+            .map_err(|e| {
+                let _ = CloseHandle(job);
+                SyspulseError::Process(format!("OpenProcess failed: {}", e))
+            })?;
 
         let result = AssignProcessToJobObject(job, handle);
         let _ = CloseHandle(handle);

@@ -34,9 +34,9 @@ impl IpcClient {
         write_message(&mut writer, &request).await?;
         debug!("Sent IPC request: {:?}", request);
 
-        let response: Response = read_message(&mut reader)
-            .await?
-            .ok_or_else(|| SyspulseError::Ipc("Server closed connection without response".into()))?;
+        let response: Response = read_message(&mut reader).await?.ok_or_else(|| {
+            SyspulseError::Ipc("Server closed connection without response".into())
+        })?;
 
         debug!("Received IPC response: {:?}", response);
         Ok(response)

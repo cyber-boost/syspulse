@@ -1,6 +1,5 @@
 /target
 **/target
-Cargo.lock
 *.pyc
 __pycache__/
 *.egg-info/
@@ -13,5 +12,6 @@ dist/
 .env
 *.db
 *.db-journal
-looks goo
 .history
+.venv312
+NOREADME.md

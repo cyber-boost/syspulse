@@ -1,3 +1,0 @@
-[daemon]
-name = "echo-server"
-command = ["python", "-m", "http.server", "8000"]

@@ -117,21 +117,19 @@ impl DaemonManager {
             let health_spec: crate::daemon::HealthCheckSpec = health_spec.clone();
 
             let handle = tokio::spawn(async move {
-                Self::run_health_check(
-                    instances,
-                    registry,
-                    daemon_name,
-                    health_spec,
-                    shutdown_rx,
-                )
-                .await;
+                Self::run_health_check(instances, registry, daemon_name, health_spec, shutdown_rx)
+                    .await;
             });
 
             let mut handles = self.health_handles.lock().await;
             handles.insert(name.to_string(), handle);
         }
 
-        info!("Started daemon '{}' with PID {}", name, result.pid.unwrap_or(0));
+        info!(
+            "Started daemon '{}' with PID {}",
+            name,
+            result.pid.unwrap_or(0)
+        );
         Ok(result)
     }
 
@@ -166,7 +164,9 @@ impl DaemonManager {
             } else {
                 let timeout = {
                     let reg = self.registry.lock().await;
-                    reg.get_spec(name).map(|s| s.stop_timeout_secs).unwrap_or(30)
+                    reg.get_spec(name)
+                        .map(|s| s.stop_timeout_secs)
+                        .unwrap_or(30)
                 };
                 self.process_driver.stop(pid, timeout).await?;
             }
@@ -262,7 +262,10 @@ impl DaemonManager {
         // Stop if active and force.
         if force {
             let instances = self.instances.read().await;
-            let is_active = instances.get(name).map(|i| i.state.is_active()).unwrap_or(false);
+            let is_active = instances
+                .get(name)
+                .map(|i| i.state.is_active())
+                .unwrap_or(false);
             drop(instances);
             if is_active {
                 self.stop_daemon(name, true).await?;
@@ -310,11 +313,7 @@ impl DaemonManager {
         match request {
             Request::Start { name, .. } => match self.start_daemon(&name).await {
                 Ok(inst) => Response::Ok {
-                    message: format!(
-                        "Daemon '{}' started (PID {})",
-                        name,
-                        inst.pid.unwrap_or(0)
-                    ),
+                    message: format!("Daemon '{}' started (PID {})", name, inst.pid.unwrap_or(0)),
                 },
                 Err(e) => error_response(e),
             },
@@ -324,18 +323,16 @@ impl DaemonManager {
                 },
                 Err(e) => error_response(e),
             },
-            Request::Restart { name, force, .. } => {
-                match self.restart_daemon(&name, force).await {
-                    Ok(inst) => Response::Ok {
-                        message: format!(
-                            "Daemon '{}' restarted (PID {})",
-                            name,
-                            inst.pid.unwrap_or(0)
-                        ),
-                    },
-                    Err(e) => error_response(e),
-                }
-            }
+            Request::Restart { name, force, .. } => match self.restart_daemon(&name, force).await {
+                Ok(inst) => Response::Ok {
+                    message: format!(
+                        "Daemon '{}' restarted (PID {})",
+                        name,
+                        inst.pid.unwrap_or(0)
+                    ),
+                },
+                Err(e) => error_response(e),
+            },
             Request::Status { name } => match name {
                 Some(name) => match self.status(&name).await {
                     Ok(instance) => Response::Status { instance },
@@ -648,10 +645,7 @@ impl DaemonManager {
                 }
 
                 if should_restart {
-                    info!(
-                        "Restarting daemon '{}' after {:?} backoff",
-                        name, backoff
-                    );
+                    info!("Restarting daemon '{}' after {:?} backoff", name, backoff);
 
                     let mgr = Arc::clone(&manager);
                     let daemon_name = name.clone();
@@ -824,7 +818,11 @@ async fn cron_start_daemon(components: &ManagerComponents, name: &str) -> Result
         handles.insert(name.to_string(), handle);
     }
 
-    info!("Cron-started daemon '{}' with PID {}", name, result.pid.unwrap_or(0));
+    info!(
+        "Cron-started daemon '{}' with PID {}",
+        name,
+        result.pid.unwrap_or(0)
+    );
     Ok(result)
 }
 

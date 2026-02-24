@@ -6,12 +6,7 @@ use syspulse_core::ipc::protocol::{Request, Response};
 use crate::client::CliClient;
 use crate::commands::OutputFormat;
 
-pub async fn run(
-    socket_path: &Path,
-    name: &str,
-    force: bool,
-    format: &OutputFormat,
-) -> Result<()> {
+pub async fn run(socket_path: &Path, name: &str, force: bool, format: &OutputFormat) -> Result<()> {
     let client = CliClient::new(socket_path);
 
     let response = client

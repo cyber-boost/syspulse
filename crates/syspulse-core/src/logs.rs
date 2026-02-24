@@ -106,12 +106,7 @@ impl LogManager {
 
     /// Read the last N lines from a daemon's log file.
     /// If `stderr` is true, reads from stderr.log; otherwise stdout.log.
-    pub fn read_logs(
-        &self,
-        daemon_name: &str,
-        lines: usize,
-        stderr: bool,
-    ) -> Result<Vec<String>> {
+    pub fn read_logs(&self, daemon_name: &str, lines: usize, stderr: bool) -> Result<Vec<String>> {
         let dir = self.log_dir(daemon_name);
         let filename = if stderr { "stderr.log" } else { "stdout.log" };
         let log_path = dir.join(filename);
@@ -169,7 +164,10 @@ fn tail_file(path: &Path, n: usize) -> Result<Vec<String>> {
 
         if lines_in_buf.len() > n || remaining == 0 {
             let start = lines_in_buf.len().saturating_sub(n);
-            return Ok(lines_in_buf[start..].iter().map(|s| s.to_string()).collect());
+            return Ok(lines_in_buf[start..]
+                .iter()
+                .map(|s| s.to_string())
+                .collect());
         }
     }
 }

@@ -147,16 +147,10 @@ fn format_instance_detail(instance: &DaemonInstance) -> String {
     lines.push(format!("Uptime:     {}", format_uptime(instance)));
 
     if let Some(ref t) = instance.started_at {
-        lines.push(format!(
-            "Started:    {}",
-            t.format("%Y-%m-%d %H:%M:%S UTC")
-        ));
+        lines.push(format!("Started:    {}", t.format("%Y-%m-%d %H:%M:%S UTC")));
     }
     if let Some(ref t) = instance.stopped_at {
-        lines.push(format!(
-            "Stopped:    {}",
-            t.format("%Y-%m-%d %H:%M:%S UTC")
-        ));
+        lines.push(format!("Stopped:    {}", t.format("%Y-%m-%d %H:%M:%S UTC")));
     }
     if let Some(code) = instance.exit_code {
         lines.push(format!("Exit Code:  {}", code));
