@@ -10,7 +10,7 @@ name = "syspulse"
 path = "src/main.rs"
 
 [dependencies]
-syspulse-core = { path = "../syspulse-core", version = "0.1.0" }
+syspulse-core = { path = "../syspulse-core", version = "0.1.1" }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

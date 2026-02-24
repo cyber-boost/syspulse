@@ -10,7 +10,7 @@ A practical comparison of daemon management tools to help you pick the right one
 |---|---|---|---|---|
 | **Platforms** | Linux only | Linux, macOS | Linux, macOS, Windows | **Windows, macOS, Linux** |
 | **Runtime** | Built into OS | Python | Node.js | Single Rust binary |
-| **Install** | Package manager + unit files | `pip install supervisor` | `npm i -g pm2` | `cargo install syspulse-cli` |
+| **Install** | Package manager + unit files | `pip install supervisor` | `npm i -g pm2` | `cargo install syspulse` |
 | **Config format** | INI-style unit files | INI | JS/JSON/YAML | TOML (`.sys` files) |
 | **Health checks** | Watchdog protocol | External scripts required | Basic status only | HTTP, TCP, command — built in |
 | **Log handling** | `journalctl` + `logrotate` | Manual rotation | Built-in, rotates on restart | Automatic rotation + compression + retention |

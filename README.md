@@ -29,7 +29,7 @@ For a deeper comparison with alternatives, see the [Decision Guide →](docs/WHY
 ### Install
 
 ```bash
-cargo install syspulse-cli
+cargo install syspulse
 ```
 
 ### Configure
@@ -107,7 +107,7 @@ Syspulse is built with Rust (2021 edition) and organized as a Cargo workspace wi
 syspulse/
 ├── crates/
 │   ├── syspulse-core/   # Core daemon management logic
-│   ├── syspulse-cli/    # Command-line interface
+│   ├── syspulse/    # Command-line interface
 │   └── syspulse-py/     # Python bindings (PyO3)
 ├── examples/            # Sample configurations
 └── docs/                # Documentation
@@ -136,12 +136,12 @@ syspulse-core/src/
 
 Platform modules expose a unified `ProcessHandler` trait — each file implements the OS-specific version. Health checks share a common trait with one module per check type. Public API is re-exported from `lib.rs` to keep the crate surface small.
 
-### `syspulse-cli`
+### `syspulse`
 
 The interface. Translates user commands into IPC calls against the running daemon manager.
 
 ```
-syspulse-cli/src/
+syspulse/src/
 ├── main.rs             # Entry point, async runtime setup
 ├── commands/
 │   ├── start.rs        # syspulse start

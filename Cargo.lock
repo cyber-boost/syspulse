@@ -1684,7 +1684,7 @@ dependencies = [
 
 [[package]]
 name = "syspulse"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1703,7 +1703,7 @@ dependencies = [
 
 [[package]]
 name = "syspulse-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1732,7 +1732,7 @@ dependencies = [
 
 [[package]]
 name = "syspulse-py"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "pyo3",

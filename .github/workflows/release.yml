@@ -23,11 +23,17 @@ jobs:
         id: tag
         run: echo "version=${GITHUB_REF_NAME#py-v}" >> "$GITHUB_OUTPUT"
 
-      - name: Check Cargo.toml version
+      - name: Check workspace version
         run: |
-          cargo_version=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          cargo_version=$(python - <<'PY'
+          import tomllib
+          from pathlib import Path
+          data = tomllib.loads(Path("Cargo.toml").read_text(encoding="utf-8"))
+          print(data["workspace"]["package"]["version"])
+          PY
+          )
           if [ "$cargo_version" != "${{ steps.tag.outputs.version }}" ]; then
-            echo "::error::Tag version (${{ steps.tag.outputs.version }}) does not match Cargo.toml ($cargo_version)"
+            echo "::error::Tag version (${{ steps.tag.outputs.version }}) does not match workspace version ($cargo_version)"
             exit 1
           fi
 

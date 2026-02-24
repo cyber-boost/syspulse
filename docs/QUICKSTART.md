@@ -14,7 +14,7 @@ Get Syspulse running in under five minutes.
 ## 1. Install the CLI
 
 ```bash
-cargo install syspulse-cli
+cargo install syspulse
 ```
 
 After installation, ensure `~/.cargo/bin` is on your `PATH`. Most systems configure this automatically; Windows adds it to your user profile during Rust setup.
