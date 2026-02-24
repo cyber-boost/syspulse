@@ -1,94 +1,94 @@
-# Quickstart Guide
+# Quick Start Guide
+
+Get Syspulse running in under five minutes.
+
+---
 
 ## Prerequisites
 
-- Rust toolchain with `cargo` installed. Get it from https://rustup.rs.
-- A terminal that can run the commands below. The steps work on Windows, macOS, and Linux.
+- **Rust toolchain** with `cargo` — install from [rustup.rs](https://rustup.rs)
+- A terminal on Windows, macOS, or Linux
 
-## Install the CLI
+---
 
-The easiest way to get the `syspulse` command line tool is to install it from crates.io.
+## 1. Install the CLI
 
 ```bash
 cargo install syspulse-cli
 ```
 
-After the install finishes, make sure the binary directory is in your `PATH`. On most systems this is `~/.cargo/bin` (Windows adds it to your user profile automatically).
+After installation, ensure `~/.cargo/bin` is on your `PATH`. Most systems configure this automatically; Windows adds it to your user profile during Rust setup.
 
-## Create a basic daemon configuration
+---
 
-You can start with a ready‑made template:
+## 2. Create a daemon configuration
+
+Generate a starter `.sys` file:
 
 ```bash
 syspulse init mydaemons.sys
 ```
 
-Open `mydaemons.sys` and replace its content with a minimal example:
+Open `mydaemons.sys` and replace its contents with a minimal example:
 
 ```toml
 [[daemon]]
 name = "example"
-command = "echo Hello from Syspulse"
-restart = "on-failure"
+command = ["echo", "Hello from Syspulse"]
+
+[daemon.restart_policy]
+policy = "on_failure"
 ```
 
-The `[[daemon]]` table defines a single daemon. **Do not use `[[daemons]]`; the singular form is required.**
+> **Note:** Use the singular `[[daemon]]` — not `[[daemons]]`.
 
-## Start the daemon manager
+---
 
-Run the daemon manager in the background:
+## 3. Start the daemon manager
 
 ```bash
 syspulse daemon &
 ```
 
-The `&` makes the process run in the background on Unix‑like shells. On Windows PowerShell you can start it with the `Start-Process` cmdlet or simply add `Start-Job`.
+The `&` backgrounds the process on Unix shells. On Windows PowerShell, use `Start-Process` or `Start-Job` instead.
 
-## Register a daemon with the manager
+---
 
-If the manager is already running you can add a new daemon without restarting it:
+## 4. Register and run your daemon
 
 ```bash
+# Register the daemon(s) defined in your .sys file
 syspulse add --file mydaemons.sys
-```
 
-The command reads the file and registers any `[[daemon]]` definitions it finds.
-
-## Start and stop a daemon
-
-To start a specific daemon:
-
-```bash
+# Start a specific daemon
 syspulse start example
-```
 
-To stop it:
+# Check what's running
+syspulse status
 
-```bash
+# View log output
+syspulse logs example
+
+# Stop the daemon
 syspulse stop example
 ```
 
-You can also restart a daemon with `syspulse restart <name>`.
+---
 
-## View status and logs
+## Troubleshooting
 
-Check which daemons are running:
+**`cargo` not found** — Ensure the Rust toolchain is installed and `~/.cargo/bin` is on your `PATH`.
 
-```bash
-syspulse status
-```
+**Permission errors** — On Windows, run the terminal as Administrator. On macOS/Linux, verify the target command is executable.
 
-Show the log output of a daemon (replace `example` with your daemon name):
+**Configuration errors** — Validate your `.sys` file against the [Configuration Reference →](CONFIG.md).
 
-```bash
-syspulse logs example
-```
+**Daemon exits immediately** — Check the command itself. If the process finishes quickly, the manager will restart it according to the configured restart policy.
 
-## Troubleshooting tips
+---
 
-- **`cargo` not found** – make sure the Rust toolchain is installed and its `bin` directory is on `PATH`.
-- **Permission errors** – on Windows run the terminal as Administrator; on macOS/Linux ensure the command you launch is executable.
-- **Configuration errors** – verify your `.sys` file is valid.
-- **Daemon exits immediately** – verify the command you gave. If it finishes quickly the manager will restart it according to the `restart` policy.
+## Next steps
 
-You now have a working Syspulse setup. From here you can add more daemons, tweak restart policies, or explore health‑check features.
+- Add health checks, restart policies, and resource limits — see the [Configuration Reference →](CONFIG.md)
+- Explore every CLI command and flag — see the [CLI Reference →](CLI.md)
+- Browse ready-to-use examples in the [`examples/`](../examples/) directory

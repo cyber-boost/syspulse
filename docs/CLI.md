@@ -1,21 +1,22 @@
-# syspulse CLI Reference (v0.1.0)
+# CLI Reference
 
-The `syspulse` binary provides a set of commands to manage daemons, inspect their status, and configure the system. All commands share a set of **global options** that can be placed before or after the sub‑command.
+> **Version 0.1.0**
 
 ---
 
-## Global Options
+## Global options
 
-| Flag | Short | Type | Default | Env Var | Description |
-|------|-------|------|---------|---------|-------------|
-| `--data-dir` | — | PATH | platform‑dependent | `SYSPULSE_DATA_DIR` | Override the default data directory |
-| `--socket` | — | PATH | platform‑dependent | — | Override the socket/pipe path |
-| `--format` | — | `table` \| `json` | `table` | — | Choose output format |
-| `--no-color` | — | flag | off | respects `NO_COLOR` | Disable colored output |
-| `--verbose` | `-v` | flag | off | — | Debug‑level output |
-| `--quiet` | `-q` | flag | off | — | Show errors only |
+These flags can be placed before or after any subcommand.
 
-### Example
+| Flag | Short | Default | Description |
+|---|---|---|---|
+| `--data-dir <PATH>` | — | platform-dependent | Override the data directory (`SYSPULSE_DATA_DIR`) |
+| `--socket <PATH>` | — | platform-dependent | Override the socket/pipe path |
+| `--format <FMT>` | — | `table` | Output format: `table` or `json` |
+| `--no-color` | — | off | Disable colored output (respects `NO_COLOR` env var) |
+| `--verbose` | `-v` | off | Debug-level output |
+| `--quiet` | `-q` | off | Errors only |
+
 ```bash
 syspulse --data-dir /tmp/syspulse --format json status
 ```
@@ -25,7 +26,8 @@ syspulse --data-dir /tmp/syspulse --format json status
 ## Commands
 
 ### `daemon`
-Run the daemon manager in the foreground. No additional arguments. The daemon must be running before any other command works.
+
+Run the daemon manager in the foreground. Must be running before any other command works.
 
 ```bash
 syspulse daemon
@@ -34,85 +36,70 @@ syspulse daemon
 ---
 
 ### `start <NAME>`
+
 Start a named daemon.
 
-| Flag | Type | Description |
-|------|------|-------------|
-| `--wait` | flag | Block until the daemon reports *Running* |
-| `--timeout <SECS>` | u64 (optional) | Timeout in seconds; only used with `--wait` |
+| Flag | Description |
+|---|---|
+| `--wait` | Block until the daemon reports *Running* |
+| `--timeout <SECS>` | Fail after this many seconds (requires `--wait`) |
 
-**Examples**
 ```bash
-# Start "web" and return immediately
 syspulse start web
-
-# Block until "web" is running, fail after 30 s
 syspulse start web --wait --timeout 30
 ```
 
 ---
 
 ### `stop <NAME>`
+
 Stop a named daemon.
 
-| Flag | Type | Description |
-|------|------|-------------|
-| `--force` | flag | Kill the process immediately, skipping graceful shutdown |
-| `--timeout <SECS>` | u64 (optional) | How long to wait for a graceful stop |
+| Flag | Description |
+|---|---|
+| `--force` | Kill immediately, skip graceful shutdown |
+| `--timeout <SECS>` | How long to wait for graceful stop |
 
-**Examples**
 ```bash
-# Graceful stop, default timeout
 syspulse stop web
-
-# Force kill
 syspulse stop web --force
-
-# Graceful stop with a 10 s timeout
 syspulse stop web --timeout 10
 ```
 
 ---
 
 ### `restart <NAME>`
-Restart a named daemon (stop then start).
 
-| Flag | Type | Description |
-|------|------|-------------|
-| `--force` | flag | Force kill before restarting |
-| `--wait` | flag | Block until the daemon reports *Running* after restart |
+Stop then start a named daemon.
 
-**Examples**
+| Flag | Description |
+|---|---|
+| `--force` | Force kill before restarting |
+| `--wait` | Block until the daemon reports *Running* after restart |
+
 ```bash
-# Simple restart
 syspulse restart web
-
-# Restart and wait for it to be ready
-syspulse restart web --wait
-
-# Force‑kill then restart, waiting for readiness
 syspulse restart web --force --wait
 ```
 
 ---
 
 ### `status [NAME]`
+
 Show daemon status.
-- Without `NAME`: table of all daemons (Name, State, PID, Uptime, Health, Restarts).
-- With `NAME`: detailed view including ID, State, PID, Health, Restarts, Uptime, start/stop timestamps, exit code, and log paths.
+
+Without `NAME`, displays a summary table of all daemons (name, state, PID, uptime, health, restarts). With `NAME`, shows a detailed view including timestamps, exit code, and log paths.
 
 ```bash
-# All daemons
 syspulse status
-
-# Detailed view for "web"
 syspulse status web
 ```
 
 ---
 
 ### `list`
-List all registered daemons in the same table format as `status` (no detailed view).
+
+List all registered daemons in summary table format.
 
 ```bash
 syspulse list
@@ -121,105 +108,99 @@ syspulse list
 ---
 
 ### `logs <NAME>`
+
 View daemon logs.
 
-| Flag | Short | Type | Default | Description |
-|------|-------|------|---------|-------------|
-| `-n, --lines <N>` | — | usize | 50 | Number of lines to show |
-| `--stderr` | — | flag | off | Show *stderr* instead of *stdout* |
-| `-f, --follow` | — | flag | off | Follow log output ( **not yet implemented in v0.1** ) |
+| Flag | Short | Default | Description |
+|---|---|---|---|
+| `--lines <N>` | `-n` | `50` | Number of lines to show |
+| `--stderr` | — | off | Show stderr instead of stdout |
+| `--follow` | `-f` | off | Follow log output *(not yet implemented in v0.1)* |
 
-**Examples**
 ```bash
-# Show last 50 lines of stdout (default)
 syspulse logs web
-
-# Show last 20 lines of stderr
 syspulse logs web --stderr -n 20
-
-# Attempt to follow (will error in v0.1)
-syspulse logs web --follow
 ```
 
 ---
 
 ### `add`
-Add a new daemon. Two mutually exclusive modes:
 
-1. **File mode** – Load daemon specifications from a `.sys` config file. Multiple daemons can be defined in one file.
-   ```bash
-   syspulse add --file /path/to/daemons.sys
-   ```
-2. **Inline mode** – Define a single daemon directly. Each word after `--command` becomes a separate argument.
-   ```bash
-   syspulse add --name web --command python -m http.server 8000
-   ```
-   Both `--name` **and** `--command` must be supplied together. The inline daemon is created with defaults: no health check, `never` restart policy, 30 s stop timeout.
+Register a new daemon. Two mutually exclusive modes:
 
-*Note*: `--file` cannot be used together with `--name`/`--command`.
+**From file** — load one or more daemons from a `.sys` config file:
+
+```bash
+syspulse add --file /path/to/daemons.sys
+```
+
+**Inline** — define a single daemon directly (requires both `--name` and `--command`):
+
+```bash
+syspulse add --name web --command python -m http.server 8000
+```
+
+Inline daemons use defaults: no health check, `never` restart policy, 30s stop timeout.
+
+> `--file` and `--name`/`--command` cannot be combined.
 
 ---
 
 ### `remove <NAME>`
+
 Remove a daemon from the manager.
 
-| Flag | Type | Description |
-|------|------|-------------|
-| `--force` | flag | Remove even if the daemon is currently running |
+| Flag | Description |
+|---|---|
+| `--force` | Remove even if currently running |
 
 ```bash
-# Simple removal
 syspulse remove web
-
-# Force removal while running
 syspulse remove web --force
 ```
 
 ---
 
 ### `init [PATH]`
-Generate a template `.sys` configuration file.
-- `PATH` defaults to `syspulse.sys` in the current directory.
-- The command fails if the target file already exists.
+
+Generate a template `.sys` configuration file. Defaults to `syspulse.sys` in the current directory. Fails if the target file already exists.
 
 ```bash
-# Create default config in current directory
 syspulse init
-
-# Write to a custom location
 syspulse init /tmp/myconfig.sys
 ```
 
 ---
 
-## Default Paths (platform‑specific)
+## Default paths
 
-| Item | Linux/macOS | Windows |
-|------|--------------|----------|
+| Item | Linux / macOS | Windows |
+|---|---|---|
 | Data directory | `~/.syspulse` | `%LOCALAPPDATA%\syspulse` |
 | Socket / pipe | `<data_dir>/syspulse.sock` | `\\.\pipe\syspulse` |
-| Logs | `<data_dir>/logs/<daemon-name>/` | `<data_dir>\logs\<daemon-name>\` |
+| Logs | `<data_dir>/logs/<daemon>/` | `<data_dir>\logs\<daemon>\` |
 | Database | `<data_dir>/syspulse.db` | `<data_dir>\syspulse.db` |
 | PID file | `<data_dir>/syspulse.pid` | `<data_dir>\syspulse.pid` |
 
-Overrides: use `SYSPULSE_DATA_DIR` env var or `--data-dir` flag for the data directory; use `--socket` for the socket/pipe path.
+Override the data directory with the `SYSPULSE_DATA_DIR` environment variable or `--data-dir` flag. Override the socket path with `--socket`.
 
 ---
 
-## Environment Variables
+## Environment variables
 
 | Variable | Purpose |
-|----------|---------|
+|---|---|
 | `SYSPULSE_DATA_DIR` | Override the default data directory |
-| `NO_COLOR` | Any value disables colored output (standard convention) |
+| `NO_COLOR` | Any value disables colored output ([standard convention](https://no-color.org)) |
 
 ---
 
-## Output Formats
+## Output formats
 
-- `--format table` (default): Human‑readable tables with colors indicating state (green = Running/Healthy, red = Failed/Unhealthy, yellow = Starting/Stopping, cyan = Scheduled, dimmed = Stopped/Unknown).
-- `--format json`: Machine‑parseable JSON; each command emits a JSON object or array matching the textual output.
+**`--format table`** (default) — Human-readable tables with color-coded state: green for Running/Healthy, red for Failed/Unhealthy, yellow for Starting/Stopping, cyan for Scheduled, dimmed for Stopped/Unknown.
+
+**`--format json`** — Machine-parseable JSON. Each command emits a JSON object or array matching the structure of the table output.
 
 ---
 
-*All information reflects the functionality present in version **0.1.0** of `syspulse`. Flags marked as not yet implemented will return an error when used.*
+*Flags marked as not yet implemented will return an error when used in v0.1.0.*

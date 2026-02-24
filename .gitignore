@@ -15,3 +15,4 @@ dist/
 .history
 .venv312
 NOREADME.md
+.ruff_cache/    

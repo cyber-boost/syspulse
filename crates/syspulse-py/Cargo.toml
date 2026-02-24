@@ -10,7 +10,7 @@ name = "_syspulse"
 crate-type = ["cdylib"]
 
 [dependencies]
-syspulse-core = { path = "../syspulse-core" }
+syspulse-core = { path = "../syspulse-core", version = "0.1.0" }
 pyo3 = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }

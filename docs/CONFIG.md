@@ -1,110 +1,149 @@
-# syspulse Configuration Reference (v0.1.0)
+# Configuration Reference
+
+> **Version 0.1.0**
+
+Syspulse daemons are defined in `.sys` files using TOML syntax. Use `[daemon]` for a single daemon or `[[daemon]]` for multiple daemons in one file.
+
+---
 
 ## Daemon specification
 
-The top‑level daemon description lives under `[daemon]` for a single daemon or `[[daemon]]` for an array of daemons. All keys listed below are parsed directly from the `DaemonSpec` struct.
-
-| TOML key | Type | Required | Default | Description |
+| Key | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `name` | String | yes | — | Unique identifier for the daemon |
-| `command` | Array of String | yes | — | Executable and arguments to run |
+| `name` | String | **yes** | — | Unique identifier for the daemon |
+| `command` | Array of String | **yes** | — | Executable and arguments |
+| `description` | String | no | — | Human-readable description |
 | `working_dir` | String (path) | no | current directory | Working directory for the process |
-| `env` | Table of String→String | no | empty | Environment variables passed to the process |
-| `health_check` | Table | no | none | Configuration for health monitoring |
-| `restart_policy` | Table | no | `never` | Restart behaviour after exit |
-| `resource_limits` | Table | no | none | Optional resource caps |
-| `schedule` | String | no | none | Cron expression; if present the daemon runs on schedule instead of continuously |
-| `tags` | Array of String | no | empty | Arbitrary tags for grouping |
-| `stop_timeout_secs` | Integer | no | `30` | Seconds to wait for graceful shutdown before killing |
-| `log_config` | Table | no | none (defaults when section present) | Log rotation settings |
-| `description` | String | no | none | Human‑readable description |
-| `user` | String | no | none | Unix user to run as (Unix only) |
+| `env` | Table (String → String) | no | — | Environment variables passed to the process |
+| `user` | String | no | — | Unix user to run as (Unix only) |
+| `tags` | Array of String | no | — | Arbitrary tags for grouping and filtering |
+| `stop_timeout_secs` | Integer | no | `30` | Seconds to wait for graceful shutdown before kill |
+| `schedule` | String (cron) | no | — | Cron expression; daemon runs on schedule instead of continuously |
+| `health_check` | Table | no | — | Health monitoring configuration |
+| `restart_policy` | Table | no | `never` | Restart behavior after exit |
+| `resource_limits` | Table | no | — | Memory, CPU, and file descriptor caps |
+| `log_config` | Table | no | — | Log rotation settings |
 
-## Health check specification
+---
 
-Defined under `[daemon.health_check]`. All keys mirror the `HealthCheckSpec` struct.
+## Health checks
 
-| TOML key | Type | Required | Default | Description |
+Defined under `[daemon.health_check]`.
+
+| Key | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `type` | "http", "tcp", "command" | yes | — | Kind of health probe |
-| `target` | String | yes | — | Target string, format depends on `type` |
-| `interval_secs` | Integer | no | `30` | Seconds between successive checks |
+| `type` | `"http"` · `"tcp"` · `"command"` | **yes** | — | Kind of health probe |
+| `target` | String | **yes** | — | Probe target (format depends on `type`) |
+| `interval_secs` | Integer | no | `30` | Seconds between checks |
 | `timeout_secs` | Integer | no | `5` | Seconds before a single check times out |
-| `retries` | Integer | no | `3` | Failures required to mark daemon unhealthy |
+| `retries` | Integer | no | `3` | Consecutive failures before marking unhealthy |
 | `start_period_secs` | Integer | no | `0` | Grace period after start before the first check |
 
-### Health check types
-- **http** – `target` must be a URL, e.g. `"http://127.0.0.1:3000/health"`. An HTTP GET is issued; any 2xx response is considered healthy.
-- **tcp** – `target` is `"host:port"`, e.g. `"127.0.0.1:5432"`. A TCP connection attempt is made; success marks the daemon healthy.
-- **command** – `target` is a shell command, e.g. `"pg_isready -h localhost"`. The command runs; exit code `0` means healthy.
+### Check types
 
-## Restart policy specification
+**`http`** — Sends an HTTP GET to `target`. Any 2xx response is healthy.
+```toml
+[daemon.health_check]
+type = "http"
+target = "http://127.0.0.1:8080/health"
+```
 
-The `[daemon.restart_policy]` table is a tagged enum keyed by `policy`.
+**`tcp`** — Attempts a TCP connection to `host:port`. Connection success is healthy.
+```toml
+[daemon.health_check]
+type = "tcp"
+target = "127.0.0.1:5432"
+```
 
-### `policy = "never"` (default)
-The daemon is not restarted after exit. No additional fields.
+**`command`** — Runs a shell command. Exit code `0` is healthy.
+```toml
+[daemon.health_check]
+type = "command"
+target = "pg_isready -h localhost"
+```
 
-### `policy = "always"`
-Restart the daemon after every exit, regardless of exit code.
+---
 
-### `policy = "on_failure"`
+## Restart policies
+
+Defined under `[daemon.restart_policy]`. The `policy` key selects the strategy.
+
+### `never` (default)
+
+The daemon is not restarted after exit.
+
+### `always`
+
+Restart after every exit, regardless of exit code.
+
+### `on_failure`
+
 Restart only when the exit code is non-zero or the process was killed by a signal.
 
-### Backoff fields (apply to `always` and `on_failure` only)
+### Backoff options
 
-| TOML key | Type | Default | Description |
+These keys apply to `always` and `on_failure` policies:
+
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `max_retries` | Integer (optional) | unlimited | Maximum restart attempts; omit for unlimited |
+| `max_retries` | Integer | unlimited | Maximum restart attempts (omit for unlimited) |
 | `backoff_base_secs` | Float | `1.0` | Initial backoff delay in seconds |
 | `backoff_max_secs` | Float | `300.0` | Upper bound for backoff delay |
 
-Delay is calculated as `backoff_base_secs * 2^attempt`, capped at `backoff_max_secs`, plus 0-10% random jitter.
+Delay formula: `backoff_base_secs × 2^attempt`, capped at `backoff_max_secs`, plus 0–10% random jitter.
+
+---
 
 ## Resource limits
 
 Optional `[daemon.resource_limits]` section.
 
-| TOML key | Type | Default | Description |
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `max_memory_bytes` | Integer | none | Upper memory bound in bytes |
-| `max_cpu_percent` | Float | none | Maximum CPU usage as a percentage (0‑100) |
-| `max_open_files` | Integer | none | Upper limit on open file descriptors |
+| `max_memory_bytes` | Integer | — | Upper memory bound in bytes |
+| `max_cpu_percent` | Float | — | Maximum CPU usage (0–100) |
+| `max_open_files` | Integer | — | Upper limit on open file descriptors |
+
+---
 
 ## Log configuration
 
-Optional `[daemon.log_config]` section. Fields have built‑in defaults.
+Optional `[daemon.log_config]` section.
 
-| TOML key | Type | Default | Description |
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `max_size_bytes` | Integer | `52428800` (50 MB) | Size at which the log file rotates |
-| `retain_count` | Integer | `5` | How many rotated files to keep |
-| `compress_rotated` | Boolean | `false` | Whether to gzip rotated files |
+| `max_size_bytes` | Integer | `52428800` (50 MB) | File size that triggers rotation |
+| `retain_count` | Integer | `5` | Rotated files to keep |
+| `compress_rotated` | Boolean | `false` | Gzip rotated files |
+
+---
 
 ## Environment variables
 
-Environment variables are expressed as a table under `[daemon.env]`.
+Expressed as a table under `[daemon.env]`:
+
 ```toml
 [daemon.env]
 NODE_ENV = "production"
 PORT = "3000"
 ```
-Each key/value pair is passed to the daemon unchanged.
 
-## Single vs. multiple daemon syntax
-- **Single daemon** – use a single table `[daemon]`. The file can contain only one daemon configuration.
-- **Multiple daemons** – use an array of tables `[[daemon]]`. Each block defines an independent daemon. The parser treats both forms identically.
+Each key-value pair is passed to the daemon process unchanged.
 
-## Example configurations
+---
 
-### Minimal example
+## Examples
+
+### Minimal
+
 ```toml
 [daemon]
 name = "echo-server"
 command = ["python", "-m", "http.server", "8000"]
 ```
 
-### Web server with health check
+### Web server with health check and restart policy
+
 ```toml
 [daemon]
 name = "web-api"
@@ -126,7 +165,8 @@ backoff_base_secs = 1
 backoff_max_secs = 300
 ```
 
-### Background worker (no health check, always restart)
+### Background worker
+
 ```toml
 [daemon]
 name = "worker"
@@ -139,19 +179,38 @@ backoff_max_secs = 120
 ```
 
 ### Scheduled job
+
 ```toml
 [daemon]
 name = "cleanup-job"
 command = ["python", "scripts/cleanup.py"]
 schedule = "0 0 * * *"
-description = "Daily cleanup job"
+description = "Daily cleanup at midnight"
 
 [daemon.restart_policy]
 policy = "never"
 ```
 
-## Further reading
-All example files mentioned above live in the `examples/` directory of the repository.
+### Multi-daemon file
+
+```toml
+[[daemon]]
+name = "api"
+command = ["./api-server", "--port", "8080"]
+tags = ["backend"]
+
+[[daemon]]
+name = "worker"
+command = ["./worker", "--queue", "jobs"]
+tags = ["backend"]
+
+[[daemon]]
+name = "scheduler"
+command = ["./scheduler"]
+schedule = "*/5 * * * *"
+tags = ["infra"]
+```
 
 ---
-*Version 0.1.0*
+
+More examples are available in the [`examples/`](../examples/) directory.

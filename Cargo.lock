@@ -1683,7 +1683,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "syspulse-cli"
+name = "syspulse"
 version = "0.1.0"
 dependencies = [
  "anyhow",

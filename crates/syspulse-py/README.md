@@ -1,4 +1,3 @@
-![Syspulse logo](./logo.png)
 # Syspulse
 
 **One daemon manager. Every platform.**
@@ -208,4 +207,6 @@ cargo test
 ---
 
 ## License
-www.cyberboost.com/license for more information 
+
+<!-- Update with your actual license -->
+[MIT](LICENSE)
